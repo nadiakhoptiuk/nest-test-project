@@ -8,10 +8,17 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  NotFoundException,
+  ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfilesService } from './profiles.service';
+import { Roles } from '../roles/roles.decorator';
+import { RolesGuard } from '@/roles/roles.guard';
+import { UserRole } from '@/users/entities/user.entity';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 
 @Controller('profiles')
 export class ProfilesController {
@@ -25,8 +32,15 @@ export class ProfilesController {
 
   // GET /profiles/:id
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.profilesService.findOneByID(id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    try {
+      return this.profilesService.findOneByID(id);
+    } catch (error: any) {
+      throw new NotFoundException(error?.message || '');
+    }
+
+    // throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    // throw new NotFoundException();
   }
 
   // POST /profiles
@@ -38,17 +52,18 @@ export class ProfilesController {
   // PUT /profiles/:id
   @Put(':id')
   updateDescription(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
-    return {
-      id,
-      ...updateProfileDto,
-    };
+    return this.profilesService.updateOne(id, updateProfileDto);
   }
 
   // DELETE /profiles/:id
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {}
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.profilesService.removeOne(id);
+  }
 }
