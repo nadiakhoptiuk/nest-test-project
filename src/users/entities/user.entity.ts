@@ -42,6 +42,14 @@ export class User {
   @Column({
     type: 'varchar',
     length: 255,
+    unique: true,
+    nullable: true,
+  })
+  shopifyGID: string | null;
+
+  @Column({
+    type: 'varchar',
+    length: 255,
   })
   password: string;
 
@@ -62,7 +70,10 @@ export class User {
   updatedAt: Date;
 
   constructor(
-    user: Omit<User, 'id' | 'orders' | 'role' | 'createdAt' | 'updatedAt'>,
+    user: Omit<
+      User,
+      'id' | 'orders' | 'role' | 'shopifyGID' | 'createdAt' | 'updatedAt'
+    >,
   ) {
     Object.assign(this, user);
   }

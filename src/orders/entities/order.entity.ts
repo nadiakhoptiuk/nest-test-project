@@ -1,28 +1,33 @@
+import { LineItem } from '@/line-items/entities/line-item.entity';
 import { User } from '@/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  Generated,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
-export enum CurrencyEnum {
-  USD = 'USD',
-  CAD = 'CAD',
-  UAH = 'UAH',
-}
 
 @Entity()
 export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  @Generated('uuid')
+  @Column({
+    type: 'varchar',
+    length: 255,
+    unique: true,
+  })
   orderNumber: string;
+
+  @Column({
+    type: 'varchar',
+    length: 255,
+    unique: true,
+  })
+  shopifyGID: string;
 
   @Column({
     type: 'decimal',
@@ -32,10 +37,10 @@ export class Order {
   total: number;
 
   @Column({
-    type: 'enum',
-    enum: CurrencyEnum,
+    type: 'varchar',
+    length: 255,
   })
-  currency: CurrencyEnum;
+  currency: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -43,11 +48,19 @@ export class Order {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.orders)
-  user: User;
+  @ManyToOne(() => User, (user) => user.orders, {
+    nullable: true,
+  })
+  user: User | null;
+
+  @OneToMany(() => LineItem, (lineItem) => lineItem.order)
+  lineItems: LineItem[];
 
   constructor(
-    order: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt'>,
+    order: Omit<
+      Order,
+      'id' | 'user' | 'orderNumber' | 'createdAt' | 'updatedAt'
+    >,
   ) {
     Object.assign(this, order);
   }

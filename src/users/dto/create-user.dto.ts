@@ -1,5 +1,4 @@
 import {
-  IsAlphanumeric,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -25,12 +24,15 @@ export class CreateUserDto {
   @IsNotEmpty()
   email: string;
 
+  @IsString()
+  @Length(1, 255)
+  shopifyGID?: string;
+
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
 
-  @IsAlphanumeric()
-  @Length(0, 8)
+  @Length(8, 255)
   @IsNotEmpty()
   password: string;
 }

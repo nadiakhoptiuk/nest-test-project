@@ -1,10 +1,10 @@
-import { Body, Controller, Headers, Post, Req } from '@nestjs/common';
+import { Body, Controller, Headers, Post } from '@nestjs/common';
 import { WebhooksService } from './webhooks.service';
+import type {
+  ShopifyCustomerWebhook,
+  ShopifyOrderWebhook,
+} from './webhooks.service';
 import { Public } from '@/auth/public.decorator';
-
-interface ShopifyRequest extends Request {
-  rawBody: Buffer;
-}
 
 @Controller('webhooks')
 export class WebhooksController {
@@ -13,14 +13,18 @@ export class WebhooksController {
   @Public()
   @Post('shopify/customer')
   async handleCustomerWebhook(
-    @Body() body: any,
-    @Headers('x-shopify-hmac-sha256') hmac: string,
-    @Req() request: ShopifyRequest,
+    @Body() body: ShopifyCustomerWebhook,
+    @Headers('x-shopify-topic') topic: string,
   ) {
-    return this.webhooksService.handleCustomerWebhook(
-      body,
-      request.rawBody,
-      hmac,
-    );
+    return this.webhooksService.handleCustomerWebhook(body, topic);
+  }
+
+  @Public()
+  @Post('shopify/order')
+  async handleOrderWebhook(
+    @Body() body: ShopifyOrderWebhook,
+    @Headers('x-shopify-topic') topic: string,
+  ) {
+    return this.webhooksService.handleOrderWebhook(body, topic);
   }
 }

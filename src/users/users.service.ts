@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -40,6 +41,14 @@ export class UsersService {
 
   async findByEmail(email: string) {
     return this.usersRepository.findOneBy({ email });
+  }
+
+  async findByShopifyGID(shopifyGID: string) {
+    if (!shopifyGID.trim()) {
+      throw new BadRequestException('Invalid or missing Shopify GID');
+    }
+
+    return this.usersRepository.findOneBy({ shopifyGID });
   }
 
   async findAll() {

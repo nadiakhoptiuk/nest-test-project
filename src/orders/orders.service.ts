@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,28 +15,30 @@ export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
-
-    @InjectRepository(Order)
-    private readonly usersRepository: Repository<User>,
     private readonly entityManager: EntityManager,
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
     const { userId, ...orderData } = createOrderDto;
 
-    const user = await this.entityManager.findOneBy(User, {
-      id: userId,
-    });
+    let user: User | null = null;
 
-    if (!user) {
-      throw new NotFoundException(`User with id ${userId} not found`);
+    if (userId != null) {
+      user = await this.entityManager.findOneBy(User, {
+        id: userId,
+      });
+
+      if (!user) {
+        throw new NotFoundException(`User with id ${userId} not found`);
+      }
     }
 
     const newOrder = this.ordersRepository.create({
       ...orderData,
       user,
     });
-    return await this.ordersRepository.save(newOrder);
+
+    return this.ordersRepository.save(newOrder);
   }
 
   findAll() {
@@ -41,6 +47,22 @@ export class OrdersService {
 
   findOne(id: number) {
     return `This action returns a #${id} order`;
+  }
+
+  async findByShopifyGID(shopifyGID: string) {
+    if (!shopifyGID.trim()) {
+      throw new BadRequestException('Invalid or missing Shopify GID');
+    }
+
+    return this.ordersRepository.findOneBy({ shopifyGID });
+  }
+
+  async findByOrderName(orderName: string) {
+    if (!orderName.trim()) {
+      throw new BadRequestException('Invalid or missing Shopify order name');
+    }
+
+    return this.ordersRepository.findOneBy({ orderNumber: orderName });
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {
@@ -59,10 +81,20 @@ export class OrdersService {
       user = found;
     }
 
-    return this.ordersRepository.update(id, {
+    await this.ordersRepository.update(id, {
       ...orderData,
       ...(user && { user }),
     });
+
+    const updatedOrder = await this.ordersRepository.findOne({
+      where: { id },
+    });
+
+    if (!updatedOrder) {
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+
+    return updatedOrder;
   }
 
   remove(id: number) {

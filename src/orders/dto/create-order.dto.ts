@@ -1,15 +1,21 @@
-import { IsEnum, IsNumber } from 'class-validator';
-import { CurrencyEnum } from '../entities/order.entity';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateOrderDto {
+  @IsOptional()
   @IsNumber()
-  userId: number;
+  userId?: number | null;
+
+  @IsString()
+  orderNumber: string;
+
+  @IsString()
+  shopifyGID: string;
 
   @IsNumber({
     maxDecimalPlaces: 2,
   })
   total: number;
 
-  @IsEnum(CurrencyEnum)
-  currency: CurrencyEnum;
+  @IsString()
+  currency: string;
 }
