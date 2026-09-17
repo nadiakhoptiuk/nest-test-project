@@ -16,6 +16,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { LoggerModule } from 'nestjs-pino';
+import { BullModule } from '@nestjs/bullmq';
 import { ShopifyWebhookMiddleware } from './webhooks/middleware/shopifyWebhookMiddleware';
 import { LineItemsModule } from './line-items/line-items.module';
 
@@ -31,6 +32,12 @@ import { LineItemsModule } from './line-items/line-items.module';
             singleLine: true,
           },
         },
+      },
+    }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
       },
     }),
     ConfigModule.forRoot({ isGlobal: true }),

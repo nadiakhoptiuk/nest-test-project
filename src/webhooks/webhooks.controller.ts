@@ -1,14 +1,19 @@
 import { Body, Controller, Headers, Post } from '@nestjs/common';
-import { WebhooksService } from './webhooks.service';
-import type {
-  ShopifyCustomerWebhook,
-  ShopifyOrderWebhook,
-} from './webhooks.service';
 import { Public } from '@/auth/public.decorator';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import type { ShopifyCustomerWebhook } from '@/users/users.types';
+import type { ShopifyOrderWebhook } from '@/orders/order.types';
 
 @Controller('webhooks')
 export class WebhooksController {
-  constructor(private readonly webhooksService: WebhooksService) {}
+  constructor(
+    @InjectQueue('orders')
+    private readonly ordersQueue: Queue,
+
+    @InjectQueue('users')
+    private readonly usersQueue: Queue,
+  ) {}
 
   @Public()
   @Post('shopify/customer')
@@ -16,7 +21,13 @@ export class WebhooksController {
     @Body() body: ShopifyCustomerWebhook,
     @Headers('x-shopify-topic') topic: string,
   ) {
-    return this.webhooksService.handleCustomerWebhook(body, topic);
+    console.log('user-webhook');
+    await this.usersQueue.add('user-webhook', {
+      topic,
+      body,
+    });
+
+    return { received: true };
   }
 
   @Public()
@@ -25,6 +36,17 @@ export class WebhooksController {
     @Body() body: ShopifyOrderWebhook,
     @Headers('x-shopify-topic') topic: string,
   ) {
-    return this.webhooksService.handleOrderWebhook(body, topic);
+    try {
+      await this.ordersQueue.add('order-webhook', {
+        topic,
+        body,
+      });
+
+      return { received: true };
+    } catch (error) {
+      console.error('❌ queue error:', error);
+
+      throw error;
+    }
   }
 }
