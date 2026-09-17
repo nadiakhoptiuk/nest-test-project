@@ -22,10 +22,20 @@ export class WebhooksController {
     @Headers('x-shopify-topic') topic: string,
   ) {
     console.log('user-webhook');
-    await this.usersQueue.add('user-webhook', {
-      topic,
-      body,
-    });
+    await this.usersQueue.add(
+      'user-webhook',
+      {
+        topic,
+        body,
+      },
+      {
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
+      },
+    );
 
     return { received: true };
   }
@@ -37,10 +47,20 @@ export class WebhooksController {
     @Headers('x-shopify-topic') topic: string,
   ) {
     try {
-      await this.ordersQueue.add('order-webhook', {
-        topic,
-        body,
-      });
+      await this.ordersQueue.add(
+        'order-webhook',
+        {
+          topic,
+          body,
+        },
+        {
+          attempts: 5,
+          backoff: {
+            type: 'exponential',
+            delay: 1000,
+          },
+        },
+      );
 
       return { received: true };
     } catch (error) {
