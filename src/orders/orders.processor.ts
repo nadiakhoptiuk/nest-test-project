@@ -1,4 +1,4 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { OrdersService } from './orders.service';
 import { OrderWebhookJobData } from './order.types';
@@ -19,5 +19,18 @@ export class OrdersProcessor extends WorkerHost {
 
       await this.ordersService.handleOrderWebhook(body, topic);
     }
+  }
+
+  @OnWorkerEvent('completed')
+  onCompleted(job: Job) {
+    console.log('✅ Job completed', job.id);
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job | undefined, error: Error) {
+    console.log('❌ Job failed', {
+      jobId: job?.id,
+      error: error.message,
+    });
   }
 }

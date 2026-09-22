@@ -17,11 +17,14 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { LoggerModule } from 'nestjs-pino';
 import { BullModule } from '@nestjs/bullmq';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ShopifyWebhookMiddleware } from './webhooks/middleware/shopifyWebhookMiddleware';
 import { LineItemsModule } from './line-items/line-items.module';
+import { SupportModule } from './support/support.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     LoggerModule.forRoot({
       pinoHttp: {
         level: 'info',
@@ -48,6 +51,7 @@ import { LineItemsModule } from './line-items/line-items.module';
     AuthModule,
     WebhooksModule,
     LineItemsModule,
+    SupportModule,
   ],
   controllers: [AppController],
   providers: [
