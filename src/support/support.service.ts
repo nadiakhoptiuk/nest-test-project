@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateSupportRequestDto } from './dto/create-support-request.dto';
 import { format } from 'date-fns';
+import { getShopifyLink } from '@/utils/getShopifyLink';
 
 interface SlackResponse {
   ok: boolean;
@@ -22,15 +23,19 @@ export class SupportService {
     }
 
     const requestDate = format(new Date(data.date), 'PPP');
-    const customerLink = `https://admin.shopify.com/store/test-shop-123218/customers/${data.customerGID}`;
-    const orderLink = `https://admin.shopify.com/store/test-shop-123218/orders/${data.orderShopifyGID}`;
+    const customerLink = getShopifyLink(data.domain, data.customerGID, 'user');
+    const orderLink = getShopifyLink(
+      data.domain,
+      data.orderShopifyGID,
+      'order',
+    );
 
     const message = `
        Customer Support Request (${requestDate})
 
       Customer: ${data.customerFullName} ${customerLink}
       Email: ${data.customerEmail}
-      Order: ${data.orderNumber} ${orderLink}
+      Order: ${orderLink}
 
       Message:
       ${data.message}

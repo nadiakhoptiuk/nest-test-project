@@ -6,6 +6,7 @@ import { UsersModule } from '../users/users.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ApiKeyGuard } from './api-key.guard';
 
 const jwtModule = JwtModule.registerAsync({
   inject: [ConfigService],
@@ -23,7 +24,7 @@ const jwtModule = JwtModule.registerAsync({
 @Module({
   imports: [UsersModule, jwtModule],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard],
-  exports: [jwtModule, JwtAuthGuard],
+  providers: [AuthService, JwtAuthGuard, ApiKeyGuard],
+  exports: [jwtModule, JwtAuthGuard, ApiKeyGuard],
 })
 export class AuthModule {}

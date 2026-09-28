@@ -4,12 +4,12 @@ export class CreateSupportRequestDto {
   @IsString()
   @Length(1, 255)
   @IsNotEmpty()
-  message: string;
+  domain: string;
 
   @IsString()
   @Length(1, 255)
   @IsNotEmpty()
-  orderNumber: string;
+  message: string;
 
   @IsString()
   @Length(1, 255)

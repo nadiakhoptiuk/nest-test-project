@@ -12,6 +12,7 @@ export class SupportController {
   @UseGuards(ApiKeyGuard)
   @Post('request')
   async createSupportRequest(@Body() body: CreateSupportRequestDto) {
+    console.log('BODY', body);
     await this.supportService.sendMessageToSlack(body);
 
     return {
