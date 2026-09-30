@@ -20,9 +20,7 @@ export class SupportRequestsService {
   constructor(
     @InjectRepository(SupportRequest)
     private readonly supportRequestRepository: Repository<SupportRequest>,
-    @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
-    @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
 
@@ -103,6 +101,26 @@ export class SupportRequestsService {
       userToConnect = existingUser;
     }
 
+    let orderToConnect: Order | null = null;
+    const existingOrder = await this.ordersRepository.findOneBy({
+      shopifyGID: data.orderShopifyGID,
+    });
+
+    console.log(existingOrder);
+
+    if (!existingOrder) {
+      const newOrder = this.ordersRepository.create({
+        shopifyGID: data.orderShopifyGID,
+        user: userToConnect,
+        // orderNumber, // TODO
+        // currency, // TODO
+      });
+
+      orderToConnect = await this.ordersRepository.save(newOrder);
+    } else {
+      orderToConnect = existingOrder;
+    }
+
     // Save to database
     const supportRequest = this.supportRequestRepository.create({
       domain: data.domain,
@@ -111,6 +129,7 @@ export class SupportRequestsService {
       customerFullName: data.customerFullName,
       requestDate: new Date(data.date),
       user: userToConnect,
+      order: orderToConnect,
     });
 
     await this.supportRequestRepository.save(supportRequest);
