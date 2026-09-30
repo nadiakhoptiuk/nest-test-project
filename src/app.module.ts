@@ -20,7 +20,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ShopifyWebhookMiddleware } from './webhooks/middleware/shopifyWebhookMiddleware';
 import { LineItemsModule } from './line-items/line-items.module';
-import { SupportModule } from './support/support.module';
+import { SupportModule } from './support-requests/support-requests.module';
 
 @Module({
   imports: [

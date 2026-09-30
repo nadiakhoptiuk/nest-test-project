@@ -27,9 +27,15 @@ export class CreateSupportRequestDto {
   customerFullName: string;
 
   @IsString()
+  customerFirstName?: string;
+
+  @IsString()
+  customerLastName?: string;
+
+  @IsString()
   @Length(1, 255)
   @IsNotEmpty()
-  orderShopifyGID?: string;
+  orderShopifyGID: string;
 
   @IsDateString()
   @Length(1, 255)
